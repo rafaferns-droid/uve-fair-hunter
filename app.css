@@ -1,24 +1,28 @@
 
 /* Layout: one phone-width app column, header + scrolling view + bottom tab bar; centred on desktop */
+@font-face{font-family:"Montserrat";font-weight:600;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.19/files/montserrat-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Montserrat";font-weight:700;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.19/files/montserrat-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Montserrat";font-weight:800;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.19/files/montserrat-latin-800-normal.woff2) format("woff2")}
 :root{
-  --bg:#EEF2EF; --surface:#FFFFFF; --surface2:#F5F8F6; --fg:#16211C; --muted:#5E6C65; --line:#DCE4DF;
-  --brand:#28A878; --brand-ink:#FFFFFF; --brand-soft:#DDF3EA; --sun:#FBCB1F; --sun-ink:#3B2F00;
-  --hot:#D9534A; --warm:#E59A2B; --cold:#7A8C84;
-  --h-fb:#B9A7E8; --h-ld:#5FB89A; --h-kt:#A9B7E6; --h-pk:#D6EBB4; --h-dg:#E6CB86; --h-ff:#F2C7DD; --h-otr:#E3F27A;
+  /* UVE corporate palette: green 28A878, navy 232341, blue 48C9FF, yellow FBCB1F, orange FF5A00 */
+  --bg:#F2F2F4; --surface:#FFFFFF; --surface2:#F5F5F5; --fg:#232341; --muted:#6B6F7A; --line:#E2E3E9;
+  --brand:#28A878; --brand-ink:#FFFFFF; --brand-soft:#E6F5EF; --sun:#FBCB1F; --sun-ink:#232341; --sky:#48C9FF; --sky-soft:#DFF4FD;
+  --hot:#FF5A00; --warm:#1C9BD6; --cold:#9A9DA8;
+  --h-fb:#CDEDDF; --h-ld:#DFF4FD; --h-kt:#E3E4EE; --h-pk:#FFF1C2; --h-dg:#FFE1D1; --h-ff:#FCE3EE; --h-otr:#EEF6D5;
   --font-d:"Montserrat", "Segoe UI", Arial, sans-serif; --font-b:"Inter", "Segoe UI", Arial, sans-serif;
   --r:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E1512; --surface:#16201B; --surface2:#1C2822; --fg:#E7EFEA; --muted:#9AA9A1; --line:#2A3832;
-  --brand:#35C08C; --brand-ink:#06150F; --brand-soft:#173A2D; --sun:#FBCB1F; --sun-ink:#2A2100;
-  --hot:#F07167; --warm:#F2B04A; --cold:#8C9C95;
-  --h-fb:#6F5FA8; --h-ld:#2F7F66; --h-kt:#56659C; --h-pk:#6B8A45; --h-dg:#8E7537; --h-ff:#94566F; --h-otr:#8A9A2C;
+  --bg:#14142A; --surface:#1C1C36; --surface2:#24243F; --fg:#ECECF4; --muted:#A3A5B5; --line:#33345A;
+  --brand:#35C08C; --brand-ink:#08140F; --brand-soft:#173A2D; --sun:#FBCB1F; --sun-ink:#232341; --sky:#48C9FF; --sky-soft:#173546;
+  --hot:#FF7A33; --warm:#3BB4EC; --cold:#7C7F92;
+  --h-fb:#21503F; --h-ld:#1D4256; --h-kt:#34365A; --h-pk:#5A4E1E; --h-dg:#5A3420; --h-ff:#552F43; --h-otr:#44502A;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0E1512; --surface:#16201B; --surface2:#1C2822; --fg:#E7EFEA; --muted:#9AA9A1; --line:#2A3832;
-  --brand:#35C08C; --brand-ink:#06150F; --brand-soft:#173A2D; --sun:#FBCB1F; --sun-ink:#2A2100;
-  --hot:#F07167; --warm:#F2B04A; --cold:#8C9C95;
-  --h-fb:#6F5FA8; --h-ld:#2F7F66; --h-kt:#56659C; --h-pk:#6B8A45; --h-dg:#8E7537; --h-ff:#94566F; --h-otr:#8A9A2C;
+  --bg:#14142A; --surface:#1C1C36; --surface2:#24243F; --fg:#ECECF4; --muted:#A3A5B5; --line:#33345A;
+  --brand:#35C08C; --brand-ink:#08140F; --brand-soft:#173A2D; --sun:#FBCB1F; --sun-ink:#232341; --sky:#48C9FF; --sky-soft:#173546;
+  --hot:#FF7A33; --warm:#3BB4EC; --cold:#7C7F92;
+  --h-fb:#21503F; --h-ld:#1D4256; --h-kt:#34365A; --h-pk:#5A4E1E; --h-dg:#5A3420; --h-ff:#552F43; --h-otr:#44502A;
   color-scheme:dark}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-b);font-size:15px;line-height:1.45}
@@ -29,8 +33,9 @@ button{cursor:pointer}
 .app{height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;background:var(--surface);position:relative;overflow:hidden}
 @media (min-width:600px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
 header.top{padding-block:12px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;background:var(--surface)}
-.logo{font-family:var(--font-d);font-weight:800;font-size:18px;letter-spacing:.5px;color:var(--brand)}
-.logo span{color:var(--fg);font-weight:600;font-size:13px;letter-spacing:.2px;margin-left:6px}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--font-d)}
+.logo img{height:20px;width:auto;display:block}
+.logo span{color:var(--fg);font-weight:800;font-size:14px;letter-spacing:.2px;white-space:nowrap}
 .fairpick{margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
 .fairpick select{border:0;background:transparent;font-weight:600;max-width:150px}
 main{flex:1;overflow-y:auto;padding-block:14px 140px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -94,7 +99,7 @@ h2{font-size:16px;font-weight:700}
 .stop .t small{color:var(--muted)}
 .stop.visited{opacity:.6}
 .stop .booth{font-family:var(--font-d);font-weight:700;font-size:12px;font-variant-numeric:tabular-nums}
-.next{display:flex;gap:10px;align-items:center;background:var(--fg);color:var(--surface);border-radius:var(--r);padding:12px 14px}
+.next{display:flex;gap:10px;align-items:center;background:#232341;color:#fff;border-radius:var(--r);padding:12px 14px}
 .next b{font-family:var(--font-d)}
 .next>svg{width:22px;height:22px;flex:0 0 22px;color:var(--brand)}
 .next .go{margin-left:auto;background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px}
@@ -175,4 +180,5 @@ audio{width:100%;height:36px}
 .bigmap-body{flex:1;overflow:auto;touch-action:pan-x pan-y pinch-zoom;border:1px solid var(--line);border-radius:var(--r);background:var(--surface2);display:flex;align-items:center}
 .bigmap-body svg{width:100%;height:auto;min-height:70%;display:block}
 .bigmap-hint{margin:8px 0 0;font-size:12px;text-align:center}
-.pin-booth{font-family:var(--font-d);font-weight:700;fill:var(--fg);pointer-events:none}
+.pin .pin-booth{font-family:var(--font-d);font-weight:700;fill:var(--fg);pointer-events:none}
+@media (max-width:420px){.fairpick>.muted{display:none}.fairpick select{max-width:165px}.logo span{font-size:13px}}
