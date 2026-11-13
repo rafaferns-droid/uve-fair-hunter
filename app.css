@@ -166,3 +166,13 @@ audio{width:100%;height:36px}
 .danger{color:var(--hot)}
 
 [hidden]{display:none!important}
+
+.mapwrap{position:relative}
+.mapbig{position:absolute;right:8px;top:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px}
+.aisle{margin:6px 0 0;font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.bigmap{position:absolute;inset:0;z-index:30;background:var(--surface);display:flex;flex-direction:column;padding-block:calc(10px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.bigmap-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px}
+.bigmap-body{flex:1;overflow:auto;touch-action:pan-x pan-y pinch-zoom;border:1px solid var(--line);border-radius:var(--r);background:var(--surface2);display:flex;align-items:center}
+.bigmap-body svg{width:100%;height:auto;min-height:70%;display:block}
+.bigmap-hint{margin:8px 0 0;font-size:12px;text-align:center}
+.pin-booth{font-family:var(--font-d);font-weight:700;fill:var(--fg);pointer-events:none}

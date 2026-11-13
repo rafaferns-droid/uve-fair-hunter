@@ -1,5 +1,5 @@
 // Offline cache: the whole app, OCR engine and fair data are stored on the phone.
-const VERSION = 'fairhunter-pub-v0.3.1';
+const VERSION = 'fairhunter-pub-v0.3.2';
 const FILES = [
  "./",
  "app.css",
