@@ -1,5 +1,5 @@
 // Offline cache: the whole app, OCR engine and fair data are stored on the phone.
-const VERSION = 'fairhunter-pub-v0.3.0';
+const VERSION = 'fairhunter-pub-v0.3.1';
 const FILES = [
  "./",
  "app.css",
@@ -25,7 +25,7 @@ const FILES = [
  "vendor/tesseract/worker.min.js"
 ];
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
