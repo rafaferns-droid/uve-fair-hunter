@@ -1,6 +1,9 @@
 // Voice: live dictation (browser speech recognition) and voice-note audio recording.
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-export const canDictate = !!SR;
+// iPhone/iPad: Safari's speech recognition is unreliable (and blocks in home-screen apps).
+// There the keyboard's own microphone works better, also offline.
+export const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+export const canDictate = !!SR && !isIOS;
 export const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
 
 // Live dictation. onText(fullText, isFinal). Returns {stop()}.
@@ -11,8 +14,11 @@ export function dictate({ lang = 'es-ES', onText, onEnd, onError }) {
   rec.continuous = true;
   rec.interimResults = true;
   let finalText = '';
-  let stopped = false;
+  let stopped = false, restarts = 0, heard = false;
+  // watchdog: if nothing is heard in 8 s, give up and let the user type or use the keyboard mic
+  const dog = setTimeout(() => { if (!heard && !stopped) { stopped = true; try { rec.abort(); } catch (e) {} onError && onError('no-speech'); } }, 8000);
   rec.onresult = e => {
+    heard = true;
     let interim = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const r = e.results[i];
@@ -21,11 +27,11 @@ export function dictate({ lang = 'es-ES', onText, onEnd, onError }) {
     }
     onText && onText((finalText + ' ' + interim).trim(), !interim);
   };
-  rec.onerror = e => { onError && onError(e.error || 'error'); };
-  // Some browsers end continuous recognition after a pause: restart until the user stops.
-  rec.onend = () => { if (!stopped) { try { rec.start(); return; } catch (e) {} } onEnd && onEnd(finalText); };
+  rec.onerror = e => { if (e.error === 'no-speech' && !stopped) return; stopped = true; clearTimeout(dog); onError && onError(e.error || 'error'); };
+  // Some browsers end continuous recognition after a pause: restart a few times until the user stops.
+  rec.onend = () => { if (!stopped && restarts < 5) { restarts++; try { rec.start(); return; } catch (e) {} } clearTimeout(dog); onEnd && onEnd(finalText); };
   rec.start();
-  return { stop() { stopped = true; try { rec.stop(); } catch (e) { onEnd && onEnd(finalText); } } };
+  return { stop() { stopped = true; clearTimeout(dog); try { rec.abort(); } catch (e) {} onEnd && onEnd(finalText); } };
 }
 
 // Audio recording of the hunter's own voice note. Returns {stop(): Promise<Blob>}.
