@@ -28,6 +28,8 @@ const $ = s => document.querySelector(s);
 const view = $('#view');
 const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const HALLC = { 'F&B': '--h-fb', 'Living & Dining': '--h-ld', 'Kitchen Tech': '--h-kt', 'Packaging': '--h-pk', 'Design & Gifts': '--h-dg', 'Future Food': '--h-ff', 'Otros': '--h-otr' };
+const hallColor = (cat, legend) => (HALLC[cat] && css(HALLC[cat])) || (legend && legend[cat]) || '#ccc';
 const pColor = p => p === 'A' ? css('--hot') : p === 'B' ? css('--warm') : css('--cold');
 const initials = n => n.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
 const now = () => new Date().toISOString();
@@ -114,7 +116,7 @@ function vRoute() {
   ${next ? `<div class="next">${ICON.nav}<div style="min-width:0"><div style="font-size:12px;opacity:.8">Siguiente visita</div><b>${h(next.name)}</b> · ${h(next.booth)}</div><button class="go" type="button" data-open="${next.id}">Ficha</button></div>`
     : unpl ? '' : `<div class="next"><b>${st.length ? 'Día completado' : 'Sin visitas planificadas este día'}</b></div>`}
   ${unpl ? `<p class="muted" style="margin:0;font-size:13px">Expositores con prioridad C (start-ups, distribuidores, equipamiento, vino). Visítalos solo si te queda tiempo o te cruzas con ellos.</p>` : ''}
-  ${f.map && !unpl ? `<div class="mapwrap">${mapSvg(st)}<button type="button" class="mapbig" id="mapBig" aria-label="Ver el plano en grande">⤢ Ampliar</button></div><div class="legend">${Object.entries(legend).map(([k, c]) => `<span><i style="background:${h(c)}"></i>${h(k === 'F&B' ? 'Food & Beverage' : k)}</span>`).join('')}</div>` : ''}
+  ${f.map && !unpl ? `<div class="mapwrap">${mapSvg(st)}<button type="button" class="mapbig" id="mapBig" aria-label="Ver el plano en grande">⤢ Ampliar</button></div><div class="legend">${Object.entries(legend).map(([k, c]) => `<span><i style="background:${h(hallColor(k, legend))}"></i>${h(k === 'F&B' ? 'Food & Beverage' : k)}</span>`).join('')}</div>` : ''}
   <div class="row" style="justify-content:space-between"><h2>${st.length} ${unpl ? 'expositores' : 'visitas'} · ${st.filter(c => isVisited(c.id)).length} hechas</h2>${!unpl ? `<button type="button" class="chip dot A" id="onlyA" aria-pressed="${!!S.onlyA}" style="${S.onlyA ? 'background:var(--hot);color:#fff;border-color:transparent' : ''}">${S.onlyA ? 'Solo A ✓' : 'Ver solo A'}</button>` : ''}</div>
   <div class="stack" style="gap:8px">${st.map((c, i) => { const a = aisleOf(c), prev = i ? aisleOf(st[i - 1]) : null; return (a && a !== prev ? `<p class="aisle">Pabellón ${h(a.replace(' · ', ' · pasillo '))}</p>` : '') + stopRow(c, i + 1); }).join('') || '<div class="empty">Nada para este día.</div>'}</div>
   ${f.demo ? `<p class="demo">${h(f.note || 'Datos de demostración.')}</p>` : ''}</div>`;
@@ -141,28 +143,32 @@ function bindOpen() {
 const w0 = vb => +vb.split(' ')[2];
 function mapSvg(st, big = false) {
   const m = S.fair.map;
-  const ent = (m.entrances || []).map(e => `<circle cx="${e.x}" cy="${e.y}" r="9" fill="var(--hot)"/><text x="${e.x}" y="${e.y + 3}" text-anchor="middle" style="font:700 7px sans-serif;fill:#fff">${h(e.label[0])}</text>`).join('');
+  const ent = (m.entrances || []).map(e => `<circle cx="${e.x}" cy="${e.y}" r="9" fill="var(--sky)"/><text x="${e.x}" y="${e.y + 3}" text-anchor="middle" style="font:800 7px var(--font-d);fill:#232341">${h(e.label[0])}</text>`).join('');
   const route = st.map(c => `${c.x},${c.y}`).join(' ');
   // zoom to the day's stops so pins in one hall stay readable
   const [, , VW, VH] = m.viewBox.split(' ').map(Number);
   let vb = m.viewBox, k = 1;
   if (st.length) {
     let x0 = Math.min(...st.map(c => c.x)), x1 = Math.max(...st.map(c => c.x)), y0 = Math.min(...st.map(c => c.y)), y1 = Math.max(...st.map(c => c.y));
-    const pad = big ? 14 : 40, AR = big ? 0.72 : VW / VH;
-    let w = Math.max(x1 - x0 + pad, big ? 50 : 110), hh = Math.max(y1 - y0 + pad, big ? 60 : 90);
+    const pad = big ? 14 : 18, AR = big ? 0.72 : 1.25;
+    let w = Math.max(x1 - x0 + pad, big ? 50 : 60), hh = Math.max(y1 - y0 + pad, big ? 60 : 48);
     if (w / hh > AR) hh = w / AR; else w = hh * AR;
     w = Math.min(w, VW); hh = Math.min(hh, VH);
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     const vx = Math.max(0, Math.min(VW - w, cx - w / 2)), vy = Math.max(0, Math.min(VH - hh, cy - hh / 2));
     vb = `${vx.toFixed(1)} ${vy.toFixed(1)} ${w.toFixed(1)} ${hh.toFixed(1)}`; k = w / VW;
   }
-  const r = big ? Math.max(Math.min(w0(vb) / 22, 9), 1.6) : Math.max(9 * k * 1.3, 4.2), fs = r * 1.05;
+  // pin size: as big as the zoom allows without overlapping the nearest stop
+  let nn = Infinity;
+  for (let i = 0; i < st.length; i++) for (let j = i + 1; j < st.length; j++) { const d = Math.hypot(st[i].x - st[j].x, st[i].y - st[j].y); if (d > 0 && d < nn) nn = d; }
+  const rWant = big ? Math.min(w0(vb) / 22, 9) : Math.max(w0(vb) / 16, 2.2);
+  const r = Math.max(Math.min(rWant, nn * 0.5), 1.4), fs = r * 1.05;
   const HALLFS = Math.max(11 * k * 1.2, 5).toFixed(1);
   const halls = m.halls.map(hl => {
     const p = hl.points.split(' ').map(q => q.split(',').map(Number));
     const cx = p.reduce((a, q) => a + q[0], 0) / p.length, cy = p.reduce((a, q) => a + q[1], 0) / p.length;
     const active = st.some(c => c.hall === hl.id);
-    return `<polygon points="${h(hl.points)}" fill="${h(m.legend[hl.cat] || '#ccc')}" opacity="${active ? 1 : .45}" stroke="var(--surface)" stroke-width="2"/><text class="hall-label" x="${cx}" y="${cy + 3}" text-anchor="middle" style="font-size:${HALLFS}px">${h(hl.id.replace(' FF', ''))}</text>`;
+    return `<polygon points="${h(hl.points)}" fill="${h(hallColor(hl.cat, m.legend))}" opacity="${active ? 1 : .45}" stroke="var(--surface)" stroke-width="2"/><text class="hall-label" x="${cx}" y="${cy + 3}" text-anchor="middle" style="font-size:${HALLFS}px">${h(hl.id.replace(' FF', ''))}</text>`;
   }).join('');
   const pins = st.map((c, i) => `<g class="pin ${isVisited(c.id) ? 'visited' : ''}" data-id="${c.id}" role="button" tabindex="0" aria-label="${h(c.name)}, stand ${h(c.booth)}"><circle cx="${c.x}" cy="${c.y}" r="${r.toFixed(2)}" fill="${pColor(c.priority)}" style="stroke-width:${(r / 4.5).toFixed(2)}"/><text x="${c.x}" y="${(c.y + fs * 0.36).toFixed(2)}" text-anchor="middle" style="font-size:${fs.toFixed(2)}px">${i + 1}</text>${big ? `<text class="pin-booth" x="${c.x}" y="${(c.y + r + fs * 0.75).toFixed(2)}" text-anchor="middle" style="font-size:${(fs * 0.6).toFixed(2)}px">${h(String(c.booth).split('.').pop())}</text>` : ''}</g>`).join('');
   return `<svg id="map" viewBox="${vb}" role="img" aria-label="Plano de pabellones con la ruta del día">${halls}${ent}<polyline points="${route}" fill="none" stroke="var(--fg)" stroke-width="${(2 * Math.max(k, .35)).toFixed(2)}" stroke-dasharray="${(5 * Math.max(k, .35)).toFixed(1)} ${(4 * Math.max(k, .35)).toFixed(1)}" stroke-linecap="round" opacity=".7"/>${pins}</svg>`;
